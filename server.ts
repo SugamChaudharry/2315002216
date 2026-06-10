@@ -139,8 +139,8 @@ app.get("/schedule", async (req: Request, res: Response) => {
   }
 
   try {
-    const depots = await fetchDepots();
-    const tasks = await fetchTasks();
+    const depots = await fetchDepots(token);
+    const tasks = await fetchTasks(token);
     const schedules = await Promise.all(depots.map((depot) => buildDepotSchedule(depot, tasks)));
     return res.json({ schedules });
   } catch (error) {

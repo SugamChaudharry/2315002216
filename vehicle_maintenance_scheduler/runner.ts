@@ -1,9 +1,17 @@
+import dotenv from "dotenv";
 import { buildDepotSchedule, fetchDepots, fetchTasks } from "./index.js";
+
+dotenv.config();
 
 async function main() {
   try {
-    const depots = await fetchDepots();
-    const tasks = await fetchTasks();
+    const token = process.env.ACCESS_TOKEN;
+    if (!token) {
+      throw new Error("ACCESS_TOKEN is not configured in .env");
+    }
+
+    const depots = await fetchDepots(token);
+    const tasks = await fetchTasks(token);
 
     for (const depot of depots) {
       const schedule = await buildDepotSchedule(depot, tasks);

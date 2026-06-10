@@ -1,7 +1,7 @@
 export interface LogEntry {
   stack: string;
   level: string;
-  pkg: string;
+  package: string;
   message: string;
   timestamp: string;
 }
@@ -16,17 +16,21 @@ export async function Log(
   const payload: LogEntry = {
     stack,
     level,
-    pkg,
+    package: pkg,
     message,
     timestamp: new Date().toISOString(),
   };
 
-  await fetch("http://4.224.186.213/evaluation-service/logs", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify(payload),
-  });
+  try {
+    await fetch("http://4.224.186.213/evaluation-service/logs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify(payload),
+    });
+  } catch (_err) {
+    // Swallow logging errors to avoid impacting application flow
+  }
 }

@@ -11,6 +11,17 @@ export interface Notification {
   created_at: string;
 }
 
+function normalizeNotification(raw: Record<string, unknown>): Notification {
+  return {
+    id: String(raw["ID"] ?? raw["id"] ?? ""),
+    student_id: String(raw["StudentID"] ?? raw["student_id"] ?? ""),
+    type: (raw["Type"] ?? raw["type"] ?? "Event") as NotificationType,
+    message: String(raw["Message"] ?? raw["message"] ?? ""),
+    is_read: Boolean(raw["IsRead"] ?? raw["is_read"] ?? false),
+    created_at: String(raw["Timestamp"] ?? raw["created_at"] ?? new Date().toISOString()),
+  };
+}
+
 const TYPE_WEIGHT: Record<NotificationType, number> = {
   Placement: 3,
   Result: 2,
@@ -127,7 +138,7 @@ export async function fetchNotifications(accessToken: string): Promise<Notificat
 
   if (!response.ok) {
     await Log(
-      "fetchNotifications",
+      "backend",
       "error",
       "notification_app_be",
       `Failed to fetch notifications: ${response.status}`,
@@ -137,7 +148,13 @@ export async function fetchNotifications(accessToken: string): Promise<Notificat
   }
 
   const payload = await response.json();
-  return payload.notifications as Notification[];
+  const arr: unknown[] = Array.isArray(payload)
+    ? (payload as unknown[])
+    : Array.isArray((payload as Record<string, unknown>).notifications)
+    ? ((payload as Record<string, unknown>).notifications as unknown[])
+    : (payload as unknown[]);
+
+  return arr.map((raw) => normalizeNotification(raw as Record<string, unknown>));
 }
 
 export async function getNotificationById(accessToken: string, id: string): Promise<Notification> {
@@ -150,7 +167,7 @@ export async function getNotificationById(accessToken: string, id: string): Prom
 
   if (!response.ok) {
     await Log(
-      "getNotificationById",
+      "backend",
       "error",
       "notification_app_be",
       `Failed to fetch notification ${id}: ${response.status}`,
@@ -159,7 +176,8 @@ export async function getNotificationById(accessToken: string, id: string): Prom
     throw new Error(`Notification fetch failed with ${response.status} ${response.statusText}`);
   }
 
-  return response.json() as Promise<Notification>;
+  const raw = await response.json();
+  return normalizeNotification(raw as Record<string, unknown>);
 }
 
 export async function createNotification(accessToken: string, payload: Partial<Notification>): Promise<Notification> {
@@ -174,7 +192,7 @@ export async function createNotification(accessToken: string, payload: Partial<N
 
   if (!response.ok) {
     await Log(
-      "createNotification",
+      "backend",
       "error",
       "notification_app_be",
       `Failed to create notification: ${response.status}`,
@@ -183,7 +201,8 @@ export async function createNotification(accessToken: string, payload: Partial<N
     throw new Error(`Notification create failed with ${response.status} ${response.statusText}`);
   }
 
-  return response.json() as Promise<Notification>;
+  const raw = await response.json();
+  return normalizeNotification(raw as Record<string, unknown>);
 }
 
 export async function markNotificationRead(accessToken: string, id: string): Promise<Notification> {
@@ -195,9 +214,34 @@ export async function markNotificationRead(accessToken: string, id: string): Pro
     },
   });
 
+  if (response.status === 404) {
+    const fallback = await fetch(`http://4.224.186.213/evaluation-service/notifications/${id}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ is_read: true }),
+    });
+
+    if (!fallback.ok) {
+      await Log(
+        "backend",
+        "error",
+        "notification_app_be",
+        `Failed to mark read via fallback for ${id}: ${fallback.status}`,
+        accessToken
+      );
+      throw new Error(`Notification read update failed with ${fallback.status} ${fallback.statusText}`);
+    }
+
+    const raw = await fallback.json();
+    return normalizeNotification(raw as Record<string, unknown>);
+  }
+
   if (!response.ok) {
     await Log(
-      "markNotificationRead",
+      "backend",
       "error",
       "notification_app_be",
       `Failed to mark read: ${response.status}`,
@@ -206,7 +250,8 @@ export async function markNotificationRead(accessToken: string, id: string): Pro
     throw new Error(`Notification read update failed with ${response.status} ${response.statusText}`);
   }
 
-  return response.json() as Promise<Notification>;
+  const raw = await response.json();
+  return normalizeNotification(raw as Record<string, unknown>);
 }
 
 export async function deleteNotification(accessToken: string, id: string): Promise<{ message: string }> {
@@ -220,7 +265,7 @@ export async function deleteNotification(accessToken: string, id: string): Promi
 
   if (!response.ok) {
     await Log(
-      "deleteNotification",
+      "backend",
       "error",
       "notification_app_be",
       `Failed to delete notification: ${response.status}`,
@@ -229,7 +274,13 @@ export async function deleteNotification(accessToken: string, id: string): Promi
     throw new Error(`Notification delete failed with ${response.status} ${response.statusText}`);
   }
 
-  return response.json();
+  const text = await response.text();
+  try {
+    const parsed = JSON.parse(text);
+    return parsed;
+  } catch (_err) {
+    return { message: "Notification deleted successfully" };
+  }
 }
 
 export async function getTopInbox(accessToken: string, topN = 10): Promise<Notification[]> {
@@ -237,7 +288,7 @@ export async function getTopInbox(accessToken: string, topN = 10): Promise<Notif
   const topNotifications = getTopNotifications(notifications, topN);
 
   await Log(
-    "getTopInbox",
+    "backend",
     "info",
     "notification_app_be",
     `Computed top ${topNotifications.length} notifications from ${notifications.length} fetched items.`,
