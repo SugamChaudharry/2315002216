@@ -1,0 +1,25 @@
+import { buildDepotSchedule, fetchDepots, fetchTasks } from "./index.js";
+
+async function main() {
+  try {
+    const depots = await fetchDepots();
+    const tasks = await fetchTasks();
+
+    for (const depot of depots) {
+      const schedule = await buildDepotSchedule(depot, tasks);
+      console.log(`Depot: ${depot.name} (${depot.capacityHours}h capacity)`);
+      console.log(`  Total impact: ${schedule.totalImpact}`);
+      console.log(`  Total duration: ${schedule.totalDuration.toFixed(1)}h`);
+      console.log("  Selected tasks:");
+      for (const task of schedule.selectedTasks) {
+        console.log(`    - ${task.description} (${task.durationHours}h, impact ${task.impactScore})`);
+      }
+      console.log("");
+    }
+  } catch (error) {
+    console.error("Failed to build depot schedules:", error);
+    process.exit(1);
+  }
+}
+
+main();
