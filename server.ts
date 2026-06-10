@@ -58,6 +58,23 @@ app.post("/notifications", async (req: Request, res: Response) => {
   }
 });
 
+app.get("/notifications/priority", async (req: Request, res: Response) => {
+  const token = resolveToken(req);
+  if (!token) {
+    return res.status(500).json({ error: "ACCESS_TOKEN is not configured in .env or Authorization header" });
+  }
+
+  const n = Number(req.query.n) || 10;
+
+  try {
+    const notifications = await fetchNotifications(token);
+    const topNotifications = getTopNotifications(notifications, n);
+    return res.json({ notifications: topNotifications, count: topNotifications.length });
+  } catch (error) {
+    return res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
+  }
+});
+
 app.get("/notifications/:id", async (req: Request, res: Response) => {
   const token = resolveToken(req);
   if (!token) {
@@ -100,22 +117,6 @@ app.delete("/notifications/:id", async (req: Request, res: Response) => {
   }
 });
 
-app.get("/notifications/priority", async (req: Request, res: Response) => {
-  const token = resolveToken(req);
-  if (!token) {
-    return res.status(500).json({ error: "ACCESS_TOKEN is not configured in .env or Authorization header" });
-  }
-
-  const n = Number(req.query.n) || 10;
-
-  try {
-    const notifications = await fetchNotifications(token);
-    const topNotifications = getTopNotifications(notifications, n);
-    return res.json({ notifications: topNotifications, count: topNotifications.length });
-  } catch (error) {
-    return res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
-  }
-});
 
 app.get("/top-inbox", async (req: Request, res: Response) => {
   const token = resolveToken(req);
