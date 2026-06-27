@@ -3,6 +3,7 @@ import notificationsRouter from "./routes/notifications.js";
 import scheduleRouter from "./routes/schedule.js";
 import { getTopInbox } from "./notification_app_be/index.js";
 import { resolveToken } from "./auth.js";
+import { logRequest, logRouteError } from "./logger.js";
 
 export function createApp() {
   const app = express();
@@ -14,6 +15,8 @@ export function createApp() {
 
   app.get("/top-inbox", async (req: Request, res: Response) => {
     const token = resolveToken(req);
+    await logRequest(req, token);
+
     if (!token) {
       return res.status(500).json({
         error: "ACCESS_TOKEN is not configured in .env or Authorization header",
@@ -24,6 +27,7 @@ export function createApp() {
       const notifications = await getTopInbox(token, 10);
       return res.json({ notifications });
     } catch (error) {
+      await logRouteError("notification_app_be", error, token);
       return res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
     }
   });

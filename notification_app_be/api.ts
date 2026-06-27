@@ -5,6 +5,14 @@ import { getTopNotifications } from "./priority.js";
 
 const NOTIFICATION_BASE_URL = "http://4.224.186.213/evaluation-service/notifications";
 
+function logApiError(action: string, accessToken: string, message: string): Promise<void> {
+  return Log("backend", "error", "notification_app_be", `${action}: ${message}`, accessToken);
+}
+
+function logApiInfo(action: string, accessToken: string, message: string): Promise<void> {
+  return Log("backend", "info", "notification_app_be", `${action}: ${message}`, accessToken);
+}
+
 export async function fetchNotifications(accessToken: string): Promise<Notification[]> {
   const response = await fetch(NOTIFICATION_BASE_URL, {
     headers: {
@@ -14,13 +22,7 @@ export async function fetchNotifications(accessToken: string): Promise<Notificat
   });
 
   if (!response.ok) {
-    await Log(
-      "backend",
-      "error",
-      "notification_app_be",
-      `Failed to fetch notifications: ${response.status}`,
-      accessToken,
-    );
+    await logApiError("fetchNotifications", accessToken, `Failed to fetch notifications: ${response.status}`);
     throw new Error(`Notification fetch failed with ${response.status} ${response.statusText}`);
   }
 
@@ -43,13 +45,7 @@ export async function getNotificationById(accessToken: string, id: string): Prom
   });
 
   if (!response.ok) {
-    await Log(
-      "backend",
-      "error",
-      "notification_app_be",
-      `Failed to fetch notification ${id}: ${response.status}`,
-      accessToken,
-    );
+    await logApiError("getNotificationById", accessToken, `Failed to fetch notification ${id}: ${response.status}`);
     throw new Error(`Notification fetch failed with ${response.status} ${response.statusText}`);
   }
 
@@ -71,13 +67,7 @@ export async function createNotification(
   });
 
   if (!response.ok) {
-    await Log(
-      "backend",
-      "error",
-      "notification_app_be",
-      `Failed to create notification: ${response.status}`,
-      accessToken,
-    );
+    await logApiError("createNotification", accessToken, `Failed to create notification: ${response.status}`);
     throw new Error(`Notification create failed with ${response.status} ${response.statusText}`);
   }
 
@@ -105,13 +95,7 @@ export async function markNotificationRead(accessToken: string, id: string): Pro
     });
 
     if (!fallback.ok) {
-      await Log(
-        "backend",
-        "error",
-        "notification_app_be",
-        `Failed to mark read via fallback for ${id}: ${fallback.status}`,
-        accessToken,
-      );
+      await logApiError("markNotificationRead", accessToken, `Failed to mark read via fallback for ${id}: ${fallback.status}`);
       throw new Error(`Notification read update failed with ${fallback.status} ${fallback.statusText}`);
     }
 
@@ -120,13 +104,7 @@ export async function markNotificationRead(accessToken: string, id: string): Pro
   }
 
   if (!response.ok) {
-    await Log(
-      "backend",
-      "error",
-      "notification_app_be",
-      `Failed to mark read: ${response.status}`,
-      accessToken,
-    );
+    await logApiError("markNotificationRead", accessToken, `Failed to mark read: ${response.status}`);
     throw new Error(`Notification read update failed with ${response.status} ${response.statusText}`);
   }
 
@@ -144,13 +122,7 @@ export async function deleteNotification(accessToken: string, id: string): Promi
   });
 
   if (!response.ok) {
-    await Log(
-      "backend",
-      "error",
-      "notification_app_be",
-      `Failed to delete notification: ${response.status}`,
-      accessToken,
-    );
+    await logApiError("deleteNotification", accessToken, `Failed to delete notification: ${response.status}`);
     throw new Error(`Notification delete failed with ${response.status} ${response.statusText}`);
   }
 
@@ -166,13 +138,7 @@ export async function getTopInbox(accessToken: string, topN = 10): Promise<Notif
   const notifications = await fetchNotifications(accessToken);
   const topNotifications = getTopNotifications(notifications, topN);
 
-  await Log(
-    "backend",
-    "info",
-    "notification_app_be",
-    `Computed top ${topNotifications.length} notifications from ${notifications.length} fetched items.`,
-    accessToken,
-  );
+  await logApiInfo("getTopInbox", accessToken, `Computed top ${topNotifications.length} notifications from ${notifications.length} fetched items.`);
 
   return topNotifications;
 }
