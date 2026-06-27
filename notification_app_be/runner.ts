@@ -7,11 +7,9 @@ if (!accessToken) {
   process.exit(1);
 }
 
-const token = accessToken;
-
 async function main() {
   try {
-    const notifications = await getTopInbox(token, 10);
+    const notifications = await getTopInbox(accessToken as string, 10);
     console.log(JSON.stringify(notifications, null, 2));
   } catch (error) {
     console.error("Failed to compute top inbox:", error);

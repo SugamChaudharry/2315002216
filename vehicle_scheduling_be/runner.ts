@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
-import { buildDepotSchedule, fetchDepots, fetchTasks } from "./index.js";
+import { fetchDepots, fetchTasks, buildDepotSchedule } from "./index.js";
+import process from "process";
 
 dotenv.config();
 
