@@ -1,28 +1,28 @@
-import { Request } from "express";
-import { Log } from "./logging_middleware/index.js";
+import { Request, Response, NextFunction } from "express"
+import { Log } from "./logging_middleware/index.js"
 
-export async function logRequest(req: Request, accessToken: string | null): Promise<void> {
-  const message = `${req.method} ${req.originalUrl}`;
+export function requestLogger() {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const token = (req as any).token ?? ""
+    const start = Date.now()
 
-  if (accessToken) {
-    await Log("backend", "info", "server", `Request: ${message}`, accessToken);
-    return;
+    Log("backend", "info", "server",
+      `→ ${req.method} ${req.originalUrl}`,
+      token
+    )
+
+    res.on("finish", () => {
+      const duration = Date.now() - start
+      const level = res.statusCode >= 500 ? "error"
+                  : res.statusCode >= 400 ? "warn"
+                  : "info"
+
+      Log("backend", level, "server",
+        `← ${req.method} ${req.originalUrl} ${res.statusCode} ${duration}ms`,
+        token
+      )
+    })
+
+    next()
   }
-
-  console.info(`[server] Request: ${message}`);
-}
-
-export async function logRouteError(
-  pkg: string,
-  error: unknown,
-  accessToken: string | null,
-): Promise<void> {
-  const message = error instanceof Error ? error.message : String(error);
-
-  if (accessToken) {
-    await Log("backend", "error", pkg, `Error: ${message}`, accessToken);
-    return;
-  }
-
-  console.error(`[${pkg}] Error: ${message}`);
 }
