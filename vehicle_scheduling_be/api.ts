@@ -1,5 +1,5 @@
-import { assertDepotArray, assertTaskArray } from "./parser";
-import { Depot, Task } from "./types";
+import { assertDepotArray, assertTaskArray } from "./parser.js";
+import { Depot, Task } from "./types.js";
 
 export async function fetchDepots(token: string): Promise<Depot[]> {
   const response = await fetch(

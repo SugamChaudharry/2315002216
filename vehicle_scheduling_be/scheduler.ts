@@ -1,5 +1,5 @@
-import { knapsack } from "./knapsack";
-import { Depot, SelectedSchedule, Task } from "./types";
+import { knapsack } from "./knapsack.js";
+import { Depot, SelectedSchedule, Task } from "./types.js";
 
 export async function buildDepotSchedule(
   depot: Depot,

@@ -1,9 +1,10 @@
-import { Task } from "./types";
+import { Task } from "./types.js";
 
 export function knapsack(
   tasks: Task[],
   capacityHours: number,
 ): { selectedTasks: Task[]; totalImpact: number } {
+
   const capacity = Math.floor(capacityHours);
   if (!Number.isFinite(capacity) || capacity < 0) {
     throw new Error(`Invalid capacityHours value: ${capacityHours}`);
@@ -15,8 +16,8 @@ export function knapsack(
   );
 
   for (let i = 1; i <= n; i++) {
-    const task = tasks[i - 1];
-    const duration = Math.floor(task.durationHours);
+    const task = tasks[i - 1]; // wt
+    const duration = Math.floor(task.durationHours); // val
     if (!Number.isFinite(duration) || duration < 0) {
       throw new Error(
         `Invalid task durationHours value: ${task.durationHours} for task ${task.id}`,
