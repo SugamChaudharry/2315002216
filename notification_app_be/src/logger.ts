@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express"
-import { Log } from "../logging_middleware/index.js"
+import { Log } from "../../../logging_middleware/index.js"
 
 export function requestLogger() {
   return (req: Request, res: Response, next: NextFunction) => {

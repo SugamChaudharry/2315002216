@@ -1,22 +1,34 @@
 # 2315002216
 
-
 ### Structure
 
 - `logging_middleware/` — reusable logging helper for evaluation logging API.
-- `notification_app_be/` — priority notification inbox logic and fetcher.
-- `vehicle_maintenance_scheduler/` — knapsack-based vehicle maintenance scheduler.
+- `notification_app_be/` — independent notification service with its own package and build config.
+- `vehicle_scheduling_be/` — independent scheduling service with its own package and build config.
 - `notification_system_design.md` — REST API, DB schema, caching, and bulk notification design.
 
-### Run
+### Run each service independently
 
-- `npm install`
-- `npm run build`
-- `npm run start`
-- `npm run top-inbox -- <access_token>`
-- `npm run schedule`
+Notification service:
+```bash
+cd notification_app_be
+npm install
+npm run dev
+```
 
-> `npm run start` now compiles the project and runs the generated `dist/server.js`.
+Scheduling service:
+```bash
+cd vehicle_scheduling_be
+npm install
+npm run dev
+```
+
+### Build
+
+```bash
+cd notification_app_be && npm run build
+cd ../vehicle_scheduling_be && npm run build
+```
 
 ### Local testing
 
@@ -24,12 +36,14 @@
 ```env
 ACCESS_TOKEN=your_access_token_here
 ```
-2. Start server:
+2. Start the notification service:
 ```bash
-npm run start
+cd notification_app_be && npm run start
 ```
 3. Open in Postman or browser:
-- `GET http://localhost:3000/health`
-- `GET http://localhost:3000/top-inbox`
-- `GET http://localhost:3000/schedule`
+- `GET http://localhost:3001/health`
+4. Start the scheduling service:
+```bash
+cd vehicle_scheduling_be && npm run start
+```
 

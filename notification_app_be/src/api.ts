@@ -1,4 +1,4 @@
-import { Log } from "../logging_middleware/index.js";
+import { Log } from "../../logging_middleware/index.js";
 import { normalizeNotification } from "./parser.js";
 import { Notification } from "./types.js";
 import { getTopNotifications } from "./priority.js";
