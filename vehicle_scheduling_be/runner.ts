@@ -1,10 +1,22 @@
 import dotenv from "dotenv";
-import { buildDepotSchedule } from "./index.js";
-// import { fetchDepots, fetchTasks } from "./index.js";
+import { existsSync } from "fs";
+import { resolve } from "path";
 import process from "process";
+import { buildDepotSchedule } from "./index.js";
 import { getDummyDepots, getDummyVehicles } from "./dummy_data.js";
 
-dotenv.config();
+const envCandidates = [
+  resolve(process.cwd(), ".env"),
+  resolve(process.cwd(), "vehicle_scheduling_be/.env"),
+  resolve(process.cwd(), "dist/vehicle_scheduling_be/.env"),
+];
+
+for (const envPath of envCandidates) {
+  if (existsSync(envPath)) {
+    dotenv.config({ path: envPath });
+    break;
+  }
+}
 
 async function main() {
   try {
@@ -13,9 +25,7 @@ async function main() {
       throw new Error("ACCESS_TOKEN is not configured in .env");
     }
     const depots = getDummyDepots();
-    const tasks  = getDummyVehicles();
-    // const depots = await fetchDepots(token);
-    // const tasks = await fetchTasks(token);
+    const tasks = getDummyVehicles();
 
     for (const depot of depots) {
       const schedule = await buildDepotSchedule(depot, tasks);

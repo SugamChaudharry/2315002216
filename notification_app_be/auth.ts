@@ -12,13 +12,12 @@ export function resolveToken(req: Request): string | null {
 
 export function requireToken(req: Request, res: Response, next: NextFunction) {
   const token = resolveToken(req)
-  
+
   if (!token) {
     res.status(401).json({ error: "Unauthorized — no token provided" })
     return
   }
 
-  // attach token to request so route handlers can access it
-  (req as any).token = token
+  ;(req as any).token = token
   next()
 }
