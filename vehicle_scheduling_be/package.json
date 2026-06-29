@@ -1,19 +1,29 @@
 {
-  "name": "vehicle-scheduling-service",
+  "name": "vehicle_scheduling_be",
   "version": "1.0.0",
-  "private": true,
+  "description": "",
   "type": "module",
   "scripts": {
-    "dev": "node --loader ts-node/esm src/runner.ts",
-    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
     "start": "npm run build && node dist/server.js"
   },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
   "dependencies": {
-    "dotenv": "^16.6.1"
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "logging_middleware": "file:../logging_middleware",
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "ts-node": "^10.9.1",
-    "typescript": "^5.5.4"
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.1.1",
+    "@types/uuid": "^10.0.0",
+    "tsx": "^4.23.0",
+    "typescript": "^7.0.2"
   }
 }
