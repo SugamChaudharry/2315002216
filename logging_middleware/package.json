@@ -1,0 +1,23 @@
+{
+  "name": "logging_middleware",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/logger.js",
+  "scripts": {
+    "dev": "tsx watch src/logger.ts",
+    "build": "tsc",
+    "start": "npm run build && node dist/logger.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "tsx": "^4.23.0",
+    "typescript": "^7.0.2"
+  }
+}
